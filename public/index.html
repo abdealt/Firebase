@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FireBase Demo</title>
+    <script defer src="bundle.js"></script>
+</head>
+<body>
+    <h1>Factures</h1>
+    <form id="addFacture">
+        <div>
+            <label for="number">Numéro</label>
+            <input
+                type="text"
+                name="number"
+                id="number"
+                placeholder="Entrer le numéro de la Facture"/>
+        </div>
+        
+        <div>
+            <label for="status">Statut</label>
+            <select 
+                name="status"
+                id="status">
+                <option value="">Choisissez un statut</option>
+                <option value="A payer">À payer</option>
+                <option value="Payé">Payé</option>
+            </select>
+        </div>
+        
+        <div>
+            <button type="submit">Enregistrer</button>
+        </div>
+    </form>
+
+    <!-- Tableau pour afficher les factures -->
+    <h2>Liste des Factures</h2>
+    <table id="facturesTable" border="1">
+        <thead>
+            <tr>
+                <th>Numéro</th>
+                <th>Statut</th>
+                <th>Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Les factures seront ajoutées ici dynamiquement -->
+        </tbody>
+    </table>
+</body>
+</html>

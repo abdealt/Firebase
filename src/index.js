@@ -1,9 +1,6 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
-// import "dotenv/config";
-import { addDoc, getFirestore, collection, onSnapshot, serverTimestamp, deleteDoc, doc } from 'firebase/firestore';
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
+import { addDoc, getFirestore, collection, onSnapshot, serverTimestamp, deleteDoc, doc, updateDoc } from 'firebase/firestore';
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -14,7 +11,6 @@ const firebaseConfig = {
   messagingSenderId: "91911157958",
   appId: "1:91911157958:web:3175238aa007bdbd0abfc7"
 };
-
 
 // Initialisation de l'application Firebase
 const app = initializeApp(firebaseConfig);
@@ -31,24 +27,33 @@ function displayFactures(factures) {
     // Vérification si la facture a une date, sinon afficher "Date non disponible"
     const factureDate = facture.date ? new Date(facture.date.seconds * 1000).toLocaleString() : 'Date non disponible';
 
-    // Ajouter une colonne avec un bouton de suppression
+    // Ajouter une colonne avec un bouton de modification et suppression
     row.innerHTML = `
-      <td>${facture.number}</td>
-      <td>${facture.status}</td>
+      <td><input class="form-control" type="text" id="number-${facture.id}" value="${facture.number}" /></td>
+      <td><input class="form-control" type="text" id="status-${facture.id}" value="${facture.status}" /></td>
       <td>${factureDate}</td>
-      <td><button class="delete-btn" data-id="${facture.id}">Supprimer</button></td>
+      <td>
+        <button class="btn btn-primary edit-btn" data-id="${facture.id}">Modifier</button>
+        <button class="btn btn-primary delete-btn" data-id="${facture.id}">Supprimer</button>
+      </td>
     `;
 
     // Ajouter la ligne dans le tableau
     tableBody.appendChild(row);
   });
 
-  // Ajouter des listeners à tous les boutons "Supprimer"
-  const deleteButtons = document.querySelectorAll(".delete-btn");
-  deleteButtons.forEach(button => {
+  // Ajouter des listeners à tous les boutons "Modifier" et "Supprimer"
+  document.querySelectorAll(".delete-btn").forEach(button => {
     button.addEventListener("click", async (event) => {
-      const id = event.target.getAttribute("data-id"); // Récupérer l'ID du document
-      await deleteFacture(id); // Appeler la fonction de suppression
+      const id = event.target.getAttribute("data-id");
+      await deleteFacture(id);
+    });
+  });
+
+  document.querySelectorAll(".edit-btn").forEach(button => {
+    button.addEventListener("click", async (event) => {
+      const id = event.target.getAttribute("data-id");
+      await editFacture(id);
     });
   });
 }
@@ -71,7 +76,7 @@ function monitorFactures() {
 
 // Fonction pour ajouter une nouvelle facture dans Firestore
 document.querySelector("#addFacture").addEventListener('submit', async (event) => {
-  event.preventDefault();  // Empêcher le rechargement de la page lors de la soumission du formulaire
+  event.preventDefault();
 
   const number = document.querySelector('#number').value;
   const status = document.querySelector('#status').value;
@@ -88,21 +93,38 @@ document.querySelector("#addFacture").addEventListener('submit', async (event) =
     document.querySelector('#number').value = '';
     document.querySelector('#status').value = '';
   } else {
-    alert('Veuillez renseigner tous les champs'); // Alerte si les champs ne sont pas remplis
+    alert('Veuillez renseigner tous les champs');
   }
 });
 
 // Fonction pour supprimer une facture dans Firestore
 async function deleteFacture(id) {
-  // Référence au document spécifique à supprimer
   const factureDocRef = doc(db, "factures", id);
 
   try {
-    // Supprimer le document dans Firestore
     await deleteDoc(factureDocRef);
     console.log(`Facture avec l'ID ${id} supprimée`);
   } catch (error) {
     console.error("Erreur lors de la suppression de la facture :", error);
+  }
+}
+
+// Fonction pour modifier une facture dans Firestore
+async function editFacture(id) {
+  const factureDocRef = doc(db, "factures", id);
+  const number = document.querySelector(`#number-${id}`).value;
+  const status = document.querySelector(`#status-${id}`).value;
+
+  if (number !== "" && status !== "") {
+    await updateDoc(factureDocRef, {
+      number: number,
+      status: status,
+      date: serverTimestamp()
+    });
+
+    console.log(`Facture avec l'ID ${id} modifiée`);
+  } else {
+    console.log("Les champs 'number' et 'status' sont requis.");
   }
 }
 

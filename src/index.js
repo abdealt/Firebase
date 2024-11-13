@@ -1,6 +1,6 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
-import { addDoc, getFirestore, collection, onSnapshot, serverTimestamp, deleteDoc, doc, updateDoc } from 'firebase/firestore';
+import { addDoc, getFirestore, collection, onSnapshot, serverTimestamp, deleteDoc, doc, updateDoc, query,  orderBy } from 'firebase/firestore';
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -31,10 +31,11 @@ function displayFactures(factures) {
     row.innerHTML = `
       <td><input class="form-control" type="text" id="number-${facture.id}" value="${facture.number}" /></td>
       <td><input class="form-control" type="text" id="status-${facture.id}" value="${facture.status}" /></td>
+      <td><input class="form-control" type="text" id="montant-${facture.id}" value="${facture.montant}€" /></td>
       <td>${factureDate}</td>
       <td>
-        <button class="btn btn-primary edit-btn" data-id="${facture.id}">Modifier</button>
-        <button class="btn btn-primary delete-btn" data-id="${facture.id}">Supprimer</button>
+        <button class="btn btn-warning edit-btn" data-id="${facture.id}">Modifier</button>
+        <button class="btn btn-danger delete-btn" data-id="${facture.id}">Supprimer</button>
       </td>
     `;
 
@@ -60,7 +61,7 @@ function displayFactures(factures) {
 
 // Fonction pour surveiller les changements en temps réel dans la collection "factures"
 function monitorFactures() {
-  const facturesCol = collection(db, 'factures');
+  const facturesCol = query(collection(db, 'factures'), orderBy('number'));
   
   // Surveiller les changements en temps réel dans la collection "factures"
   onSnapshot(facturesCol, (snapshot) => {
@@ -80,18 +81,21 @@ document.querySelector("#addFacture").addEventListener('submit', async (event) =
 
   const number = document.querySelector('#number').value;
   const status = document.querySelector('#status').value;
+  const montant = document.querySelector('#montant').value;
 
   if (number !== "" && status !== "") {
     // Ajouter une nouvelle facture dans la collection "factures"
     await addDoc(collection(db, "factures"), {
       'number': number,
       'status': status,
+      'montant': montant,
       'date': serverTimestamp()
     });
 
     // Réinitialiser les champs du formulaire
     document.querySelector('#number').value = '';
     document.querySelector('#status').value = '';
+    document.querySelector('#montant').value = '';
   } else {
     alert('Veuillez renseigner tous les champs');
   }
@@ -114,11 +118,13 @@ async function editFacture(id) {
   const factureDocRef = doc(db, "factures", id);
   const number = document.querySelector(`#number-${id}`).value;
   const status = document.querySelector(`#status-${id}`).value;
+  const montant = document.querySelector(`#montant-${id}`).value;
 
   if (number !== "" && status !== "") {
     await updateDoc(factureDocRef, {
       number: number,
       status: status,
+      montant: montant,
       date: serverTimestamp()
     });
 

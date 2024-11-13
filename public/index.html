@@ -33,9 +33,19 @@
                 <option value="Payé">Payé</option>
             </select>
         </div>
+
+        <div class="mb-3">
+            <label for="montant" class="form-label">Numéro</label>
+            <input
+                type="number"
+                name="montant"
+                id="montant"
+                class="form-control"
+                placeholder="Entrer le montant de la Facture"/>
+        </div>
         
         <div>
-            <button type="submit" class="btn btn-primary">Enregistrer</button>
+            <button type="submit" class="btn btn-success">Enregistrer</button>
         </div>
     </form>
 
@@ -46,6 +56,7 @@
             <tr>
                 <th>Numéro</th>
                 <th>Statut</th>
+                <th>Montant</th>
                 <th>Date</th>
                 <th>Action</th>
             </tr>
